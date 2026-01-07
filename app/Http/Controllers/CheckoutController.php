@@ -91,7 +91,7 @@ class CheckoutController extends Controller
     public function success(Order $order)
     {
         // Ensure user can only view their own orders
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             abort(403);
         }
 
