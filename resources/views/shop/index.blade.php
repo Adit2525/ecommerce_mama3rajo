@@ -105,18 +105,18 @@
     @endif
 
     <!-- Product Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-8 md:px-12">
+    <div class="product-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-8 px-4 md:px-12">
         @forelse($products as $product)
-            <a href="{{ route('shop.show', $product) }}" class="group cursor-pointer flex flex-col h-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg overflow-hidden">
-                <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
+            <a href="{{ route('shop.show', $product) }}" class="product-card group cursor-pointer flex flex-col h-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg overflow-hidden">
+                <div class="product-image relative aspect-square md:aspect-[3/4] overflow-hidden bg-gray-50">
                     @if($product->gambar)
-                         <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                         <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama }}" class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105">
                     @else
                         <!-- Fallback Image -->
-                        <img src="{{ asset('images/square.png') }}" class="w-full h-full object-cover grayscale opacity-80 transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0">
+                        <img src="{{ asset('images/square.png') }}" class="w-full h-full object-cover object-center grayscale opacity-80 transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0">
                     @endif
                     
-                    <form action="{{ route('cart.add') }}" method="POST" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%]" onclick="event.stopPropagation();">
+                    <form action="{{ route('cart.add') }}" method="POST" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] hidden md:block" onclick="event.stopPropagation();">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="color" value="default">
@@ -127,17 +127,17 @@
                     </form>
                 </div>
                 
-                <div class="flex flex-col flex-grow justify-between p-4">
+                <div class="flex flex-col flex-grow justify-between p-2 md:p-4">
                     <div>
-                        <h3 class="text-xs uppercase tracking-wider font-bold mb-1 group-hover:underline underline-offset-4 decoration-1 truncate">{{ $product->nama }}</h3>
-                        <p class="text-[10px] text-gray-500 mb-3 line-clamp-2">
+                        <h3 class="text-[10px] md:text-xs uppercase tracking-wider font-bold mb-1 group-hover:underline underline-offset-4 decoration-1 truncate">{{ $product->nama }}</h3>
+                        <p class="text-[8px] md:text-[10px] text-gray-500 mb-2 md:mb-3 line-clamp-2 hidden md:block">
                            {{ $product->deskripsi }}
                         </p>
                     </div>
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-[10px] md:text-sm">
                         @if($product->harga_coret && $product->harga_coret > $product->harga)
                         <div class="flex flex-col">
-                            <span class="text-xs text-gray-400 line-through">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</span>
+                            <span class="text-[8px] md:text-xs text-gray-400 line-through">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</span>
                             <span class="text-red-600">IDR {{ number_format($product->harga, 0, ',', '.') }}</span>
                         </div>
                         @else
@@ -147,17 +147,25 @@
                 </div>
             </a>
         @empty
-            <div class="col-span-full h-96 flex flex-col items-center justify-center text-center">
-                <p class="font-serif text-2xl mb-4">Tidak ada produk ditemukan</p>
-                <p class="text-gray-500 text-xs uppercase tracking-widest">Silahkan cek kembali nanti</p>
+            <div class="col-span-2 md:col-span-3 lg:col-span-4 w-full py-16 md:py-24">
+                <div class="flex flex-col items-center justify-center text-center mx-auto">
+                    <svg class="w-16 h-16 text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                    </svg>
+                    <p class="font-serif text-xl md:text-2xl text-gray-700 mb-3">Tidak ada produk ditemukan</p>
+                    <p class="text-gray-400 text-xs uppercase tracking-widest">Silahkan cek kembali nanti</p>
+                </div>
             </div>
         @endforelse
     </div>
 
     <!-- Pagination -->
-    <div class="mt-24 px-8 md:px-12">
+    <div class="mt-16 md:mt-24 px-4 md:px-12 pb-8">
         {{ $products->links() }}
     </div>
+    
+    <!-- Spacer -->
+    <div class="h-8 md:h-16 w-full"></div>
 </div>
 
 <!-- Alpine.js for dropdowns -->

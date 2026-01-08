@@ -58,7 +58,7 @@
     </div>
 
     <!-- Payment Status -->
-    @if($order->status === 'pending')
+    @if($order->status === 'pending' || $order->status_pembayaran === 'menunggu_pembayaran')
     <div style="background: #fef3c7; border-radius: 8px; padding: 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
         <div style="width: 48px; height: 48px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <svg style="width: 24px; height: 24px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,6 +72,18 @@
         <a href="{{ route('payment.show', $order) }}" style="background: #d97706; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 14px;">
             Bayar Sekarang
         </a>
+    </div>
+    @elseif($order->status_pembayaran === 'lunas' || $order->status === 'diproses')
+    <div style="background: #d1fae5; border-radius: 8px; padding: 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
+        <div style="width: 48px; height: 48px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg style="width: 24px; height: 24px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 4px 0; font-weight: 600; color: #065f46;">Pembayaran Berhasil</h4>
+            <p style="margin: 0; font-size: 14px; color: #047857;">Pesanan Anda sedang diproses dan akan segera dikirim.</p>
+        </div>
     </div>
     @endif
 
@@ -145,7 +157,7 @@
         <a href="{{ route('shop.index') }}" style="flex: 1; text-align: center; background: black; color: white; padding: 16px; text-decoration: none; font-weight: 600; font-size: 14px; border-radius: 8px;">
             Lanjut Belanja
         </a>
-        @if($order->status === 'pending')
+        @if(($order->status === 'pending' || $order->status_pembayaran === 'menunggu_pembayaran') && $order->status_pembayaran !== 'lunas')
         <a href="{{ route('payment.show', $order) }}" style="flex: 1; text-align: center; background: #d4a5a5; color: white; padding: 16px; text-decoration: none; font-weight: 600; font-size: 14px; border-radius: 8px;">
             Bayar Sekarang
         </a>

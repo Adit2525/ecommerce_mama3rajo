@@ -10,7 +10,42 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        .logo-font { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.15em; }
+        
+        /* Product grid styling */
+        .product-grid {
+            display: grid !important;
+        }
+        
+        /* Empty state - should span full width */
+        .product-grid > [class*="col-span-2"]:only-child,
+        .product-grid > .empty-state {
+            grid-column: 1 / -1 !important;
+            display: flex !important;
+            justify-content: center !important;
+        }
+        
+        /* Mobile: 2 columns, square images */
+        @media (max-width: 767px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+                padding: 0 8px !important;
+            }
+            .product-image {
+                aspect-ratio: 1/1 !important;
+            }
+        }
+        
+        /* Desktop: 3-4 columns, portrait images */
+        @media (min-width: 768px) {
+            .product-image {
+                aspect-ratio: 3/4 !important;
+            }
+        }
+    </style>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -23,14 +58,24 @@
 
 
     <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[2400px] mx-auto px-8 md:px-12 h-20 flex items-center justify-between">
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
+        <div class="max-w-[2400px] mx-auto px-4 md:px-12 h-16 md:h-20 flex items-center justify-between">
+            <!-- Mobile Menu Button -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 -ml-2">
+                <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg x-show="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
             <!-- Logo -->
-            <a href="{{ route('welcome') }}" class="text-2xl font-serif font-bold tracking-widest uppercase">
+            <a href="{{ route('welcome') }}" class="logo-font text-2xl md:text-3xl tracking-widest uppercase">
                 MAMA3RAJO
             </a>
 
-            <!-- Menu -->
+            <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-8">
                 <a href="{{ route('shop.index') }}" class="text-xs font-bold uppercase tracking-widest hover:text-gray-600 transition-colors">Belanja</a>
                 <a href="{{ route('shop.index') }}" class="text-xs font-bold uppercase tracking-widest hover:text-gray-600 transition-colors">Koleksi</a>
@@ -134,6 +179,26 @@
                  </a>
             </div>
         </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             @click.away="mobileMenuOpen = false"
+             class="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50">
+            <div class="px-4 py-4 space-y-3">
+                <a href="{{ route('shop.index') }}" class="block py-3 text-sm font-bold uppercase tracking-widest border-b border-gray-100">Belanja</a>
+                <a href="{{ route('shop.index') }}" class="block py-3 text-sm font-bold uppercase tracking-widest border-b border-gray-100">Koleksi</a>
+                <a href="{{ route('about') }}" class="block py-3 text-sm font-bold uppercase tracking-widest border-b border-gray-100">Tentang Kami</a>
+                @guest
+                    <a href="{{ route('login') }}" class="block py-3 text-sm font-bold uppercase tracking-widest text-pink-600">Login</a>
+                @endguest
+            </div>
+        </div>
     </nav>
 
     <main class="flex-grow flex flex-col">
@@ -141,50 +206,67 @@
     </main>
 
     <!-- Footer - Minimalist White Theme -->
-    <footer style="background: #fff; border-top: 1px solid #e5e7eb; margin-top: auto;">
+    <footer class="bg-white border-t border-gray-200 mt-auto">
         <!-- Main Footer -->
-        <div style="max-width: 1200px; margin: 0 auto; padding: 60px 24px 40px 24px;">
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px;">
+        <div class="max-w-[1200px] mx-auto px-4 md:px-6 py-10 md:py-16">
+            <!-- Mobile: 1 column, Desktop: 4 columns -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
                 
                 <!-- Brand -->
-                <div>
-                    <h3 style="font-size: 24px; font-family: 'Playfair Display', serif; color: #d4a5a5; margin: 0 0 16px 0; font-weight: 400;">MAMA3RAJO</h3>
-                    <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0;">
+                <div class="md:col-span-1">
+                    <h3 class="logo-font text-2xl md:text-3xl text-pink-400 mb-4">MAMA3RAJO</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">
                         Get up, dress up, and never give up! Cause every woman is a Ladyboss!
                     </p>
-                </div>
-                
-                <!-- Layanan Pelanggan -->
-                <div>
-                    <h4 style="font-size: 14px; font-weight: 600; color: #111; margin: 0 0 20px 0;">Layanan Pelanggan</h4>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
-                        <li style="margin-bottom: 12px;"><a href="{{ route('register') }}" style="font-size: 14px; color: #6b7280; text-decoration: none;">Gabung</a></li>
-                        <li style="margin-bottom: 12px;"><a href="{{ route('login') }}" style="font-size: 14px; color: #6b7280; text-decoration: none;">Daftar</a></li>
-                        <li style="margin-bottom: 12px;"><a href="#" style="font-size: 14px; color: #6b7280; text-decoration: none;">Pertanyaan Umum</a></li>
-                        <li style="margin-bottom: 12px;"><a href="#" style="font-size: 14px; color: #6b7280; text-decoration: none;">Pengiriman dan Pengembalian</a></li>
-                        <li style="margin-bottom: 12px;"><a href="#" style="font-size: 14px; color: #6b7280; text-decoration: none;">Syarat dan Ketentuan</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Kontak -->
-                <div>
-                    <h4 style="font-size: 14px; font-weight: 600; color: #111; margin: 0 0 20px 0;">Kontak</h4>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
-                        <li style="margin-bottom: 12px;"><a href="#" style="font-size: 14px; color: #6b7280; text-decoration: none;">Hubungi kami</a></li>
-                        <li style="margin-bottom: 12px;"><span style="font-size: 14px; color: #6b7280;">Email: cs@mama3rajo.com</span></li>
-                        <li style="margin-bottom: 12px;"><span style="font-size: 14px; color: #6b7280;">WhatsApp: +62 812-xxxx-xxxx</span></li>
-                    </ul>
-                </div>
-                
-                <!-- Social -->
-                <div>
-                    <h4 style="font-size: 14px; font-weight: 600; color: #111; margin: 0 0 20px 0;">Ikuti kami</h4>
-                    <div style="display: flex; gap: 16px;">
-                        <a href="https://www.instagram.com/hijab_mama3rajo?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" style="color: #374151; text-decoration: none;">
-                            <svg style="width: 24px; height: 24px;" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    <!-- Social Icons - Show on mobile here -->
+                    <div class="flex gap-4 mt-4 md:hidden">
+                        <a href="https://www.instagram.com/hijab_mama3rajo" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-pink-500">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                         </a>
-                        <a href="https://www.tiktok.com/@hijab.mama3rajo?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" style="color: #374151; text-decoration: none;">
-                            <svg style="width: 24px; height: 24px;" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                        <a href="https://www.tiktok.com/@hijab.mama3rajo" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-pink-500">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links - 2 columns on mobile, 1 on desktop each -->
+                <div class="grid grid-cols-2 md:grid-cols-1 gap-6 md:gap-0">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-800 mb-4">Layanan</h4>
+                        <ul class="space-y-2 text-sm text-gray-500">
+                            <li><a href="{{ route('register') }}" class="hover:text-pink-500">Gabung</a></li>
+                            <li><a href="{{ route('login') }}" class="hover:text-pink-500">Daftar</a></li>
+                            <li><a href="#" class="hover:text-pink-500">FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div class="md:hidden">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-800 mb-4">Kontak</h4>
+                        <ul class="space-y-2 text-sm text-gray-500">
+                            <li>cs@mama3rajo.com</li>
+                            <li>+62 812-xxxx-xxxx</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Desktop only columns -->
+                <div class="hidden md:block">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-800 mb-4">Kontak</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#" class="hover:text-pink-500">Hubungi kami</a></li>
+                        <li>Email: cs@mama3rajo.com</li>
+                        <li>WhatsApp: +62 812-xxxx-xxxx</li>
+                    </ul>
+                </div>
+                
+                <!-- Social - Desktop only -->
+                <div class="hidden md:block">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-800 mb-4">Ikuti kami</h4>
+                    <div class="flex gap-4">
+                        <a href="https://www.instagram.com/hijab_mama3rajo" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-pink-500">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                        <a href="https://www.tiktok.com/@hijab.mama3rajo" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-pink-500">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
                         </a>
                     </div>
                 </div>
@@ -192,10 +274,10 @@
         </div>
         
         <!-- Copyright -->
-        <div style="border-top: 1px solid #e5e7eb; padding: 20px 24px;">
-            <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
-                <p style="font-size: 13px; color: #9ca3af; margin: 0;">© {{ date('Y') }} <a href="{{ route('welcome') }}" style="color: #d4a5a5; text-decoration: none;">MAMA3RAJO</a>.</p>
-                <p style="font-size: 13px; color: #9ca3af; margin: 0;">Indonesia / ID</p>
+        <div class="border-t border-gray-200 py-4 px-4">
+            <div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-2">
+                <p class="text-xs text-gray-400">© {{ date('Y') }} <a href="{{ route('welcome') }}" class="text-pink-400 logo-font">MAMA3RAJO</a>. All rights reserved.</p>
+                <p class="text-xs text-gray-400">Indonesia / ID</p>
             </div>
         </div>
     </footer>

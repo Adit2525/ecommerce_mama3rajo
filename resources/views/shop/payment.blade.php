@@ -373,11 +373,60 @@ function payWithMidtrans() {
             snap.pay(data.snap_token, {
                 onSuccess: function(result) {
                     console.log('Payment success:', result);
-                    window.location.href = '{{ route("payment.success", $order) }}';
+                    // Update order status via AJAX - mark as SUCCESS
+                    fetch('{{ route("midtrans.update-status") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            order_id: {{ $order->id }},
+                            source: 'onSuccess',
+                            transaction_status: result.transaction_status || 'success',
+                            payment_type: result.payment_type || 'midtrans',
+                            transaction_id: result.transaction_id || '',
+                            status_code: result.status_code || '200'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Update status response:', data);
+                        window.location.href = data.redirect || '{{ route("payment.success", $order) }}';
+                    })
+                    .catch(error => {
+                        console.error('Update status error:', error);
+                        // Even on error, redirect to success page (payment was successful in Midtrans)
+                        window.location.href = '{{ route("payment.success", $order) }}?paid=1';
+                    });
                 },
                 onPending: function(result) {
                     console.log('Payment pending:', result);
-                    window.location.href = '{{ route("payment.show", $order) }}?status=pending';
+                    // Update order status via AJAX - mark as PENDING
+                    fetch('{{ route("midtrans.update-status") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            order_id: {{ $order->id }},
+                            source: 'onPending',
+                            transaction_status: result.transaction_status || 'pending',
+                            payment_type: result.payment_type || 'midtrans',
+                            transaction_id: result.transaction_id || '',
+                            status_code: result.status_code || '201'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Update status response:', data);
+                        window.location.href = data.redirect || '{{ route("payment.show", $order) }}';
+                    })
+                    .catch(error => {
+                        console.error('Update status error:', error);
+                        window.location.href = '{{ route("payment.show", $order) }}?status=pending';
+                    });
                 },
                 onError: function(result) {
                     console.log('Payment error:', result);

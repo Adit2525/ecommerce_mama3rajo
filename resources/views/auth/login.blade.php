@@ -4,19 +4,11 @@
 <div style="display: flex; min-height: calc(100vh - 80px);">
     
     <!-- Left Side - Image -->
-    <div style="flex: 1; display: none; position: relative; background: #f5f5f5;" class="login-image">
-        @if(file_exists(public_path('images/login-bg.jpg')))
-            <img src="{{ asset('images/login-bg.jpg') }}" alt="Login" style="width: 100%; height: 100%; object-fit: cover;">
-        @else
-            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f8e1dc 0%, #e8c4bc 100%); display: flex; align-items: center; justify-content: center;">
-                <div style="text-align: center; color: #8b6f66;">
-                    <svg style="width: 80px; height: 80px; margin-bottom: 20px; opacity: 0.5;" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/>
-                    </svg>
-                    <p style="font-size: 18px; font-style: italic;">Fashion for Every Woman</p>
-                </div>
-            </div>
-        @endif
+    <div style="flex: 1; display: none; position: relative; background: #f8e1dc;" class="login-image">
+        <img src="{{ asset('images/login-bg.png') }}" alt="MAMA3RAJO Fashion" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
+        <div style="position: absolute; bottom: 40px; left: 0; right: 0; text-align: center;">
+            <p style="font-size: 18px; font-style: italic; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">Fashion for Every Woman</p>
+        </div>
     </div>
     
     <!-- Right Side - Form -->

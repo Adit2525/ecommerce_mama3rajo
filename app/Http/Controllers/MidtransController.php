@@ -213,16 +213,142 @@ class MidtransController extends Controller
         // Check payment status from Midtrans
         $transactionStatus = $request->transaction_status ?? '';
         $paymentType = $request->payment_type ?? '';
+        $transactionId = $request->transaction_id ?? '';
 
         if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
+            // Update order status directly (since webhook might not work on localhost)
+            $order->update([
+                'status' => 'diproses',
+                'status_pembayaran' => 'lunas',
+                'metode_pembayaran' => $paymentType,
+                'midtrans_transaction_id' => $transactionId,
+                'tanggal_pembayaran' => now(),
+            ]);
+
             return redirect()->route('payment.success', $order)
                            ->with('success', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
         } elseif ($transactionStatus == 'pending') {
+            // Update order to pending payment status
+            $order->update([
+                'status' => 'pending',
+                'status_pembayaran' => 'menunggu_pembayaran',
+                'metode_pembayaran' => $paymentType,
+            ]);
+
             return redirect()->route('payment.show', $order)
                            ->with('info', 'Silakan selesaikan pembayaran Anda.');
         } else {
             return redirect()->route('payment.show', $order)
                            ->with('error', 'Pembayaran tidak berhasil. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Update payment status via AJAX (for frontend callback)
+     * After payment success, status becomes "menunggu_verifikasi" for admin to verify
+     */
+    public function updatePaymentStatus(Request $request)
+    {
+        Log::info('Midtrans Update Status Request:', $request->all());
+
+        $request->validate([
+            'order_id' => 'required|integer',
+            'source' => 'nullable|string',
+            'transaction_status' => 'nullable|string',
+            'payment_type' => 'nullable|string',
+            'transaction_id' => 'nullable|string',
+            'status_code' => 'nullable|string',
+        ]);
+
+        $order = Order::where('id', $request->order_id)
+                     ->where('user_id', Auth::id())
+                     ->first();
+
+        if (!$order) {
+            Log::error('Order not found for update status:', ['order_id' => $request->order_id]);
+            return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+        }
+
+        $source = $request->source ?? '';
+        $transactionStatus = $request->transaction_status ?? '';
+        $statusCode = $request->status_code ?? '';
+        $paymentType = $request->payment_type ?? 'midtrans';
+        $transactionId = $request->transaction_id ?? '';
+
+        Log::info('Processing payment status:', [
+            'order_id' => $order->id,
+            'source' => $source,
+            'transaction_status' => $transactionStatus,
+            'status_code' => $statusCode,
+            'payment_type' => $paymentType,
+        ]);
+
+        // Use source to determine the correct status
+        // onSuccess = payment successful, onPending = payment pending
+        if ($source === 'onSuccess') {
+            // Payment successful - waiting for admin verification
+            $order->update([
+                'status' => 'menunggu_verifikasi',
+                'status_pembayaran' => 'lunas',
+                'metode_pembayaran' => $paymentType,
+                'midtrans_transaction_id' => $transactionId,
+                'tanggal_pembayaran' => now(),
+            ]);
+
+            Log::info('Payment marked as MENUNGGU_VERIFIKASI for order:', ['order_id' => $order->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran berhasil, menunggu verifikasi admin',
+                'redirect' => route('payment.success', $order),
+            ]);
+        } elseif ($source === 'onPending') {
+            // Payment pending (e.g., bank transfer VA)
+            $order->update([
+                'status' => 'pending',
+                'status_pembayaran' => 'menunggu_pembayaran',
+                'metode_pembayaran' => $paymentType,
+            ]);
+
+            Log::info('Payment marked as PENDING for order:', ['order_id' => $order->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Menunggu pembayaran',
+                'redirect' => route('payment.show', $order),
+            ]);
+        } else {
+            // Fallback: if source is not specified, check transaction_status
+            $successStatuses = ['settlement', 'capture', 'success', 'accept'];
+            
+            if (in_array(strtolower($transactionStatus), $successStatuses) || $statusCode == '200') {
+                $order->update([
+                    'status' => 'menunggu_verifikasi',
+                    'status_pembayaran' => 'lunas',
+                    'metode_pembayaran' => $paymentType,
+                    'midtrans_transaction_id' => $transactionId,
+                    'tanggal_pembayaran' => now(),
+                ]);
+
+                Log::info('Payment marked as MENUNGGU_VERIFIKASI (fallback) for order:', ['order_id' => $order->id]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran berhasil, menunggu verifikasi admin',
+                    'redirect' => route('payment.success', $order),
+                ]);
+            } else {
+                Log::info('Unknown status, no update:', [
+                    'order_id' => $order->id,
+                    'source' => $source,
+                    'status' => $transactionStatus
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Status tidak dikenali',
+                ]);
+            }
         }
     }
 }

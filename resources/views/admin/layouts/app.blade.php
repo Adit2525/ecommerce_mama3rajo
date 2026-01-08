@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Admin') - MAMA3RAJO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -32,9 +35,10 @@
 
     .sidebar-heading {
         padding: 1.5rem 1.25rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-        letter-spacing: 0.1em;
+        font-size: 1.4rem;
+        font-weight: 400;
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         border-bottom: 1px solid #333;
         color: var(--accent-color);

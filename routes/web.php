@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
 
     // Midtrans routes
     Route::post('/midtrans/snap-token', [MidtransController::class, 'createSnapToken'])->name('midtrans.snap-token');
+    Route::post('/midtrans/update-status', [MidtransController::class, 'updatePaymentStatus'])->name('midtrans.update-status');
 });
 
 // Admin routes (protected by auth + role middleware)

@@ -5,7 +5,7 @@
     <div style="max-width: 600px; width: 100%; text-align: center;">
         
         @if($order->status_pembayaran == 'lunas' || $order->status == 'diproses')
-        <!-- Payment Success -->
+        <!-- Payment Success - Fully Paid -->
         <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
             <svg style="width: 50px; height: 50px; color: #059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -21,7 +21,23 @@
         </p>
 
         @elseif($order->status == 'menunggu_verifikasi')
-        <!-- Waiting Verification (Manual Transfer) -->
+        <!-- Payment Success - Waiting Admin Verification -->
+        <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
+            <svg style="width: 50px; height: 50px; color: #059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        
+        <h1 style="font-size: 28px; font-family: 'Playfair Display', serif; font-weight: 400; margin: 0 0 16px 0; color: #111;">
+            Pembayaran Berhasil!
+        </h1>
+        
+        <p style="font-size: 16px; color: #6b7280; margin: 0 0 32px 0; line-height: 1.6;">
+            Terima kasih! Pembayaran Anda sudah diterima dan sedang menunggu verifikasi admin. Kami akan segera memproses pesanan Anda.
+        </p>
+
+        @elseif($order->status == 'pending' || $order->status_pembayaran == 'menunggu_pembayaran')
+        <!-- Pending Payment -->
         <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
             <svg style="width: 50px; height: 50px; color: #d97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -29,11 +45,11 @@
         </div>
         
         <h1 style="font-size: 28px; font-family: 'Playfair Display', serif; font-weight: 400; margin: 0 0 16px 0; color: #111;">
-            Bukti Pembayaran Terkirim!
+            Menunggu Pembayaran
         </h1>
         
         <p style="font-size: 16px; color: #6b7280; margin: 0 0 32px 0; line-height: 1.6;">
-            Terima kasih! Kami akan memverifikasi pembayaran Anda dalam waktu 1x24 jam.
+            Silakan selesaikan pembayaran Anda untuk memproses pesanan.
         </p>
 
         @else
@@ -45,7 +61,7 @@
         </div>
         
         <h1 style="font-size: 28px; font-family: 'Playfair Display', serif; font-weight: 400; margin: 0 0 16px 0; color: #111;">
-            Pesanan Diproses!
+            Pesanan Tercatat!
         </h1>
         
         <p style="font-size: 16px; color: #6b7280; margin: 0 0 32px 0; line-height: 1.6;">

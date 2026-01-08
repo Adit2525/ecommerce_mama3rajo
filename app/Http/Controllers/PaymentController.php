@@ -88,10 +88,22 @@ class PaymentController extends Controller
     }
 
     // Payment success page
-    public function success(Order $order)
+    public function success(Request $request, Order $order)
     {
         if ($order->user_id != Auth::id()) {
             abort(403);
+        }
+
+        // Fallback: if paid=1 parameter is present but order is still pending,
+        // update it to menunggu_verifikasi (payment was successful in Midtrans but AJAX failed)
+        if ($request->has('paid') && $request->paid == '1' && $order->status === 'pending') {
+            $order->update([
+                'status' => 'menunggu_verifikasi',
+                'status_pembayaran' => 'lunas',
+                'metode_pembayaran' => 'midtrans',
+                'tanggal_pembayaran' => now(),
+            ]);
+            $order->refresh();
         }
 
         return view('shop.payment-success', compact('order'));
