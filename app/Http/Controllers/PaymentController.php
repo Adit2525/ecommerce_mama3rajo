@@ -47,7 +47,9 @@ class PaymentController extends Controller
 
         return view('shop.payment', [
             'order' => $order,
-            'bankAccounts' => $this->bankAccounts
+            'bankAccounts' => $this->bankAccounts,
+            'midtransClientKey' => config('midtrans.client_key'),
+            'midtransProduction' => config('midtrans.is_production', false),
         ]);
     }
 

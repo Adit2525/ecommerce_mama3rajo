@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\MidtransController;
 
 use App\Models\Product;
 
@@ -40,6 +41,9 @@ Route::delete('/cart', [\App\Http\Controllers\CartController::class, 'clear'])->
 
 // Static pages
 Route::view('/about', 'about')->name('about');
+
+// Midtrans notification callback (must be public - no auth)
+Route::post('/midtrans/notification', [MidtransController::class, 'notification'])->name('midtrans.notification');
 
 // Auth routes (public)
 Route::middleware('guest')->group(function () {
@@ -84,6 +88,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment.show');
     Route::post('/payment/{order}/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
     Route::get('/payment/{order}/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/{order}/finish', [MidtransController::class, 'finish'])->name('payment.finish');
+
+    // Midtrans routes
+    Route::post('/midtrans/snap-token', [MidtransController::class, 'createSnapToken'])->name('midtrans.snap-token');
 });
 
 // Admin routes (protected by auth + role middleware)

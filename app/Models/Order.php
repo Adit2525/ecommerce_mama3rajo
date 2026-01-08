@@ -33,6 +33,9 @@ class Order extends Model
         'tanggal_pembayaran',
         'bank_tujuan',
         'catatan_pembayaran',
+        'snap_token',
+        'midtrans_order_id',
+        'midtrans_transaction_id',
     ];
 
     protected $casts = [
