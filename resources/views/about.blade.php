@@ -47,5 +47,7 @@
     </div>
 </section>
 
+<!-- Spacer before footer -->
+<div class="h-8 md:h-16 w-full"></div>
 
 @endsection

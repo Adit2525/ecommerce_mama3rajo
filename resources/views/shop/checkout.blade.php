@@ -99,14 +99,21 @@
                                 <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">
                                     Metode Pengiriman <span style="color: #dc2626;">*</span>
                                 </label>
-                                <select name="ekspedisi" required
-                                       style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box; background-color: white;">
-                                    <option value="" disabled {{ old('ekspedisi') ? '' : 'selected' }}>Pilih Ekspedisi</option>
-                                    <option value="regular" {{ old('ekspedisi') == 'regular' ? 'selected' : '' }}>Regular (JNE/J&T/SiCepat)</option>
-                                    <option value="toko" {{ old('ekspedisi') == 'toko' ? 'selected' : '' }}>Ekspedisi Toko</option>
-                                    <option value="lainnya" {{ old('ekspedisi') == 'lainnya' ? 'selected' : '' }}>Other / Lainnya</option>
+                                <select name="shipping_rate_id" id="shipping_rate_id" required
+                                       style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box; background-color: white;"
+                                       onchange="updateShippingCost()">
+                                    <option value="" disabled selected data-price="0">Pilih Ekspedisi</option>
+                                    @foreach($shippingRates as $rate)
+                                    <option value="{{ $rate->id }}" data-price="{{ $rate->price }}" {{ old('shipping_rate_id') == $rate->id ? 'selected' : '' }}>
+                                        {{ $rate->courier_name }} 
+                                        @if($rate->destination) - {{ $rate->destination }} @endif
+                                        @if($rate->min_distance || $rate->max_distance) ({{ $rate->min_distance ?? 0 }}-{{ $rate->max_distance ?? '∞' }} KM) @endif
+                                        - IDR {{ number_format($rate->price, 0, ',', '.') }}
+                                        @if($rate->estimate) ({{ $rate->estimate }}) @endif
+                                    </option>
+                                    @endforeach
                                 </select>
-                                @error('ekspedisi')
+                                @error('shipping_rate_id')
                                     <p style="color: #dc2626; font-size: 12px; margin: 4px 0 0 0;">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -174,13 +181,13 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 14px;">
                                 <span style="color: #6b7280;">Ongkos Kirim</span>
-                                <span style="color: #059669;">Gratis</span>
+                                <span id="shipping-cost" style="color: #6b7280;">Pilih ekspedisi</span>
                             </div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #e5e7eb;">
                             <span style="font-weight: 700; font-size: 16px;">Total</span>
-                            <span style="font-weight: 700; font-size: 22px;">IDR {{ number_format($total, 0, ',', '.') }}</span>
+                            <span id="grand-total" style="font-weight: 700; font-size: 22px;">IDR {{ number_format($total, 0, ',', '.') }}</span>
                         </div>
 
                         <button type="submit" form="checkout-form"
@@ -205,4 +212,35 @@
         </div>
     </div>
 </div>
+
+<script>
+    const subtotal = {{ $total }};
+    
+    function formatRupiah(number) {
+        return 'IDR ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+    
+    function updateShippingCost() {
+        const select = document.getElementById('shipping_rate_id');
+        const selectedOption = select.options[select.selectedIndex];
+        const shippingPrice = parseInt(selectedOption.dataset.price) || 0;
+        
+        const shippingCostEl = document.getElementById('shipping-cost');
+        const grandTotalEl = document.getElementById('grand-total');
+        
+        if (shippingPrice > 0) {
+            shippingCostEl.textContent = formatRupiah(shippingPrice);
+            shippingCostEl.style.color = '#000';
+        } else {
+            shippingCostEl.textContent = 'Pilih ekspedisi';
+            shippingCostEl.style.color = '#6b7280';
+        }
+        
+        const grandTotal = subtotal + shippingPrice;
+        grandTotalEl.textContent = formatRupiah(grandTotal);
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', updateShippingCost);
+</script>
 @endsection

@@ -104,6 +104,21 @@
             <a href="{{ route('admin.reports.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                 <span>Laporan</span>
             </a>
+            <a href="{{ route('admin.shipping-rates.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('admin.shipping-rates.*') ? 'active' : '' }}">
+                <span>Ongkos Kirim</span>
+            </a>
+            <a href="{{ route('admin.users.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <span>Kelola Pengguna</span>
+            </a>
+            @php
+                $pendingPasswordRequests = \App\Models\PasswordChangeRequest::where('status', 'pending')->count();
+            @endphp
+            <a href="{{ route('admin.password-requests.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('admin.password-requests.*') ? 'active' : '' }}">
+                <span>Verifikasi Password</span>
+                @if($pendingPasswordRequests > 0)
+                    <span class="badge bg-warning text-dark ms-2">{{ $pendingPasswordRequests }}</span>
+                @endif
+            </a>
             <a href="{{ route('welcome') }}" class="list-group-item list-group-item-action mt-5">
                 <span>Lihat Website</span>
             </a>

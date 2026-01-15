@@ -4,19 +4,11 @@
 <div style="display: flex; min-height: calc(100vh - 80px);">
     
     <!-- Left Side - Image -->
-    <div style="flex: 1; display: none; position: relative; background: #f5f5f5;" class="login-image">
-        @if(file_exists(public_path('images/register-bg.jpg')))
-            <img src="{{ asset('images/register-bg.jpg') }}" alt="Register" style="width: 100%; height: 100%; object-fit: cover;">
-        @else
-            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #e8c4bc 0%, #f8e1dc 100%); display: flex; align-items: center; justify-content: center;">
-                <div style="text-align: center; color: #8b6f66;">
-                    <svg style="width: 80px; height: 80px; margin-bottom: 20px; opacity: 0.5;" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                    </svg>
-                    <p style="font-size: 18px; font-style: italic;">Join Our Community</p>
-                </div>
-            </div>
-        @endif
+    <div style="flex: 1; display: none; position: relative; background: #f8e1dc;" class="login-image">
+        <img src="{{ asset('images/register-bg.png') }}" alt="MAMA3RAJO Fashion" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
+        <div style="position: absolute; bottom: 40px; left: 0; right: 0; text-align: center;">
+            <p style="font-size: 18px; font-style: italic; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">Join Our Fashion Community</p>
+        </div>
     </div>
     
     <!-- Right Side - Form -->

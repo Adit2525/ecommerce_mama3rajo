@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\ShippingRateController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -20,10 +21,22 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MidtransController;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
-    // Show slightly more products on homepage for visual impact
-    $products = Product::where('is_active', 1)->latest()->take(8)->get();
+    // Get best-selling products (highlight/best seller) based on total sold quantity
+    $products = Product::where('is_active', 1)
+        ->select('produk.*')
+        ->leftJoin('pesanan_detail', 'produk.id', '=', 'pesanan_detail.produk_id')
+        ->leftJoin('pesanan', function($join) {
+            $join->on('pesanan_detail.pesanan_id', '=', 'pesanan.id')
+                 ->whereIn('pesanan.status', ['diproses', 'dikirim', 'selesai']);
+        })
+        ->groupBy('produk.id')
+        ->orderByRaw('COALESCE(SUM(pesanan_detail.jumlah), 0) DESC')
+        ->take(8)
+        ->get();
+
     return view('welcome', compact('products'));
 })->name('welcome');
 
@@ -83,6 +96,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('/profile/orders', [ProfileController::class, 'orders'])->name('profile.orders');
     Route::get('/profile/orders/{order}', [ProfileController::class, 'orderShow'])->name('profile.order.show');
+    Route::delete('/profile/password-request', [ProfileController::class, 'cancelPasswordRequest'])->name('profile.cancel-password-request');
+
+    // Invoice route
+    Route::get('/invoice/{order}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoice.show');
 
     // Payment routes
     Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment.show');
@@ -101,9 +118,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::resource('products', ProductController::class);
     Route::resource('promotions', PromotionController::class);
+    Route::resource('shipping-rates', ShippingRateController::class);
     
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
     Route::post('orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     
@@ -114,5 +133,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::post('import/preview', [ImportController::class, 'previewCSV'])->name('import.preview');
     Route::post('import/commit', [ImportController::class, 'commitCSV'])->name('import.commit');
+    
+    // User management routes
+    Route::get('users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('users/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
+    Route::post('users/{user}/verify', [\App\Http\Controllers\Admin\UserController::class, 'verify'])->name('users.verify');
+    Route::post('users/{user}/unverify', [\App\Http\Controllers\Admin\UserController::class, 'unverify'])->name('users.unverify');
+    Route::post('users/{user}/send-reset-link', [\App\Http\Controllers\Admin\UserController::class, 'sendResetLink'])->name('users.send-reset-link');
+    Route::post('users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
+    Route::delete('users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+    
+    // Password change request routes
+    Route::get('password-requests', [\App\Http\Controllers\Admin\PasswordRequestController::class, 'index'])->name('password-requests.index');
+    Route::post('password-requests/{passwordRequest}/approve', [\App\Http\Controllers\Admin\PasswordRequestController::class, 'approve'])->name('password-requests.approve');
+    Route::post('password-requests/{passwordRequest}/reject', [\App\Http\Controllers\Admin\PasswordRequestController::class, 'reject'])->name('password-requests.reject');
 });
 

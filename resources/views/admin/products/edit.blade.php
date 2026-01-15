@@ -88,6 +88,19 @@
                     <input type="number" name="stok" id="stok" class="form-control @error('stok') is-invalid @enderror" value="{{ old('stok', $product->stok) }}">
                     @error('stok')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+                <div class="mb-3">
+                    <label for="ukuran" class="form-label">Ukuran</label>
+                    <select name="ukuran" id="ukuran" class="form-select @error('ukuran') is-invalid @enderror">
+                        <option value="">Pilih Ukuran</option>
+                        <option value="All Size" {{ old('ukuran', $product->ukuran) == 'All Size' ? 'selected' : '' }}>All Size</option>
+                        <option value="S" {{ old('ukuran', $product->ukuran) == 'S' ? 'selected' : '' }}>S</option>
+                        <option value="M" {{ old('ukuran', $product->ukuran) == 'M' ? 'selected' : '' }}>M</option>
+                        <option value="L" {{ old('ukuran', $product->ukuran) == 'L' ? 'selected' : '' }}>L</option>
+                        <option value="XL" {{ old('ukuran', $product->ukuran) == 'XL' ? 'selected' : '' }}>XL</option>
+                        <option value="XXL" {{ old('ukuran', $product->ukuran) == 'XXL' ? 'selected' : '' }}>XXL</option>
+                    </select>
+                    @error('ukuran')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
                 
                 <div class="mb-3">
                     <label for="is_active" class="form-label">Status</label>

@@ -18,6 +18,19 @@ class DashboardController extends Controller
 
         $recentOrders = Order::with('user')->latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('totalProducts', 'totalOrders', 'pendingOrders', 'totalRevenue', 'recentOrders'));
+        // Chart Data (Last 7 Days)
+        $chartLabels = [];
+        $chartData = [];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $chartLabels[] = $date->format('d M'); // e.g. 12 Jan
+            $revenue = Order::whereDate('created_at', $date->format('Y-m-d'))
+                            ->whereIn('status', ['diproses', 'dikirim', 'selesai'])
+                            ->sum('total_harga');
+            $chartData[] = $revenue;
+        }
+
+        return view('admin.dashboard', compact('totalProducts', 'totalOrders', 'pendingOrders', 'totalRevenue', 'recentOrders', 'chartLabels', 'chartData'));
     }
 }

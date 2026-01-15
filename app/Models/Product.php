@@ -19,6 +19,7 @@ class Product extends Model
         'harga',
         'harga_coret',
         'stok',
+        'ukuran',
         'gambar',
         'is_active',
     ];

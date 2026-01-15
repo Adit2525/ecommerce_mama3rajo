@@ -1,6 +1,17 @@
 @extends('layouts.store')
 
 @section('content')
+<style>
+    /* Hide number input spinner arrows */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
 <div class="max-w-[2400px] mx-auto pt-10" x-data="productOptions()">
     <div class="flex flex-col lg:flex-row h-full">
         <!-- Product Images (Left Side) -->
@@ -23,8 +34,8 @@
                  <p class="text-xs text-gray-400 uppercase tracking-widest mb-6">SKU: {{ $product->slug }}</p>
                 @if($product->harga_coret && $product->harga_coret > $product->harga)
                 <div class="flex items-center gap-4">
-                    <p class="text-lg text-gray-400 line-through">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</p>
-                    <p class="text-2xl font-medium text-red-600">IDR {{ number_format($product->harga, 0, ',', '.') }}</p>
+                    <p class="text-lg text-gray-500" style="text-decoration: line-through; text-decoration-color: #ef4444; text-decoration-thickness: 2px;">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</p>
+                    <p class="text-2xl font-bold text-red-600">IDR {{ number_format($product->harga, 0, ',', '.') }}</p>
                 </div>
                 @else
                 <p class="text-2xl font-medium">IDR {{ number_format($product->harga, 0, ',', '.') }}</p>
@@ -33,26 +44,47 @@
                 <div class="mt-6 text-sm text-gray-600 leading-relaxed font-light">
                     {{ $product->deskripsi }}
                 </div>
+                
+                <!-- Stock Status -->
+                <div class="mt-4">
+                    @if($product->stok > 0)
+                        <span class="inline-flex items-center gap-1.5 text-xs text-green-600">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Stok: {{ $product->stok }}
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 text-xs text-red-500">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                            Habis
+                        </span>
+                    @endif
+                </div>
             </div>
+
+            @if(session('error'))
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
+                {{ session('error') }}
+            </div>
+            @endif
 
             <form action="{{ route('cart.add') }}" method="POST">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                 
-                <!-- Color Selection -->
-                <div class="mb-10">
-                    <div class="flex justify-between items-center mb-4">
-                        <p class="text-xs font-bold uppercase tracking-widest">Warna</p>
-                        <span class="text-xs text-gray-500 capitalize" x-text="selectedColorName"></span>
+                <!-- Color Selection - Minimalist -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <p class="text-[10px] font-medium uppercase tracking-widest text-gray-500">Warna:</p>
+                        <span class="text-[10px] text-gray-700 capitalize" x-text="selectedColorName"></span>
                     </div>
-                    <div class="flex flex-wrap gap-4">
+                    <div class="flex flex-wrap gap-2">
                         <template x-for="color in colors" :key="color.id">
                             <button type="button" 
                                     @click="selectColor(color)"
-                                    :class="{ 'ring-1 ring-offset-2 ring-black scale-110': selectedColor === color.id, 'border-gray-200': selectedColor !== color.id }"
+                                    :class="{ 'ring-1 ring-offset-1 ring-black': selectedColor === color.id }"
                                     :style="'background-color: ' + color.hex"
                                     :title="color.name"
-                                    class="w-8 h-8 rounded-full border shadow-sm transition-all hover:scale-110 focus:outline-none block">
+                                    class="w-5 h-5 rounded-full border border-gray-300 transition-all hover:scale-110 focus:outline-none">
                             </button>
                         </template>
                     </div>
@@ -60,20 +92,20 @@
                     <input type="hidden" name="color_hex" x-model="selectedColorHex">
                 </div>
 
-                <!-- Size Selection -->
-                <div class="mb-10">
-                    <div class="flex justify-between items-center mb-4">
-                        <p class="text-xs font-bold uppercase tracking-widest">Ukuran</p>
-                        <button type="button" @click="showSizeGuide = true" class="text-[10px] underline uppercase text-gray-500 hover:text-black transition-colors">
-                            Panduan Ukuran
+                <!-- Size Selection - Minimalist Inline -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <p class="text-[10px] font-medium uppercase tracking-widest text-gray-500">Ukuran:</p>
+                        <button type="button" @click="showSizeGuide = true" class="text-[9px] underline text-gray-400 hover:text-black">
+                            Panduan
                         </button>
                     </div>
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="flex flex-wrap gap-2">
                         <template x-for="size in sizes" :key="size.id">
                             <button type="button" 
                                     @click="selectedSize = size.id; selectedSizeName = size.name"
-                                    :class="selectedSize === size.id ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-200 hover:border-black'"
-                                    class="border py-3 text-xs font-bold uppercase transition-all duration-200 text-center">
+                                    :class="selectedSize === size.id ? 'bg-black text-white' : 'bg-white text-gray-700 hover:border-gray-400'"
+                                    class="border border-gray-200 px-3 py-1.5 text-[10px] font-medium uppercase transition-all">
                                 <span x-text="size.name"></span>
                             </button>
                         </template>
@@ -81,42 +113,48 @@
                     <input type="hidden" name="size" x-model="selectedSizeName">
                 </div>
 
-                <!-- Custom Notes -->
-                <div class="mb-10">
-                    <div class="flex justify-between items-center mb-3">
-                        <p class="text-xs font-bold uppercase tracking-widest">Catatan Khusus</p>
-                        <span class="text-[10px] text-gray-400 uppercase tracking-widest">(Opsional)</span>
+                <!-- Custom Notes - Minimalist -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-2">
+                        <p class="text-[10px] font-medium uppercase tracking-widest text-gray-500">Catatan:</p>
+                        <span class="text-[9px] text-gray-400">(opsional)</span>
                     </div>
                     <textarea name="custom_note" 
-                              placeholder="Tulis catatan di sini..." 
-                              class="w-full border-b border-gray-300 py-2 text-sm focus:outline-none focus:border-black transition-colors bg-transparent resize-none h-20 placeholder-gray-300"
+                              placeholder="Tulis catatan..." 
+                              class="w-full border border-gray-200 rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 transition-colors bg-transparent resize-none h-14 placeholder-gray-300"
                               ></textarea>
                 </div>
 
                 <!-- Quantity -->
-                <div class="mb-10">
-                    <p class="text-xs font-bold uppercase tracking-widest mb-4">Jumlah</p>
-                    <div class="flex items-center w-fit border border-gray-200">
-                        <button type="button" @click="quantity = Math.max(1, quantity - 1)" 
-                                class="w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white transition-colors">
-                            −
-                        </button>
-                        <input type="number" name="quantity" x-model="quantity" min="1" 
-                               class="w-12 text-center text-sm font-bold border-none focus:outline-none appearance-none bg-transparent py-2 m-0">
-                        <button type="button" @click="quantity++" 
-                                class="w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white transition-colors">
-                            +
-                        </button>
+                <div class="mb-4">
+                    <div class="flex items-center gap-3">
+                        <p class="text-[10px] font-medium uppercase tracking-widest text-gray-500">Qty:</p>
+                        <div class="flex items-center border border-gray-200 rounded">
+                            <button type="button" @click="quantity = Math.max(1, quantity - 1)" 
+                                    class="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors text-sm">
+                                −
+                            </button>
+                            <input type="number" name="quantity" x-model="quantity" min="1" 
+                                   class="w-10 text-center text-xs font-medium border-none focus:outline-none bg-transparent">
+                            <button type="button" @click="quantity++" 
+                                    class="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors text-sm">
+                                +
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-3 mb-12 mt-8">
-                    <button type="submit" class="w-full bg-black text-white py-4 uppercase text-xs font-bold tracking-widest hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                        </svg>
-                        Tambah ke Keranjang
+                <!-- Add to Cart Button -->
+                <div class="mb-6">
+                    @if($product->stok > 0)
+                    <button type="submit" class="w-full h-11 bg-black text-white uppercase text-[11px] font-semibold tracking-widest hover:bg-gray-800 transition-colors">
+                        TAMBAH KE KERANJANG
                     </button>
+                    @else
+                    <button type="button" disabled class="w-full h-11 bg-gray-300 text-gray-500 uppercase text-[11px] font-semibold tracking-widest cursor-not-allowed">
+                        STOK HABIS
+                    </button>
+                    @endif
                 </div>
             </form>
 
@@ -233,8 +271,8 @@
             <h3 class="text-xs font-bold uppercase tracking-wider group-hover:underline">{{ $related->nama }}</h3>
             @if($related->harga_coret && $related->harga_coret > $related->harga)
             <div class="flex gap-2 items-center mt-1">
-                <p class="text-xs text-gray-400 line-through">IDR {{ number_format($related->harga_coret, 0, ',', '.') }}</p>
-                <p class="text-sm font-medium text-red-600">IDR {{ number_format($related->harga, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500" style="text-decoration: line-through; text-decoration-color: #ef4444; text-decoration-thickness: 2px;">IDR {{ number_format($related->harga_coret, 0, ',', '.') }}</p>
+                <p class="text-sm font-bold text-red-600">IDR {{ number_format($related->harga, 0, ',', '.') }}</p>
             </div>
             @else
             <p class="text-sm font-medium mt-1">IDR {{ number_format($related->harga, 0, ',', '.') }}</p>

@@ -122,16 +122,12 @@ if (ctx) {
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: Array.from({length: 7}, (_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (6-i));
-                return d.toLocaleDateString('en-US', {weekday:'short'});
-            }),
+            labels: @json($chartLabels),
             datasets: [{
                 label: 'Sales (IDR)',
-                data: Array.from({length: 7}, () => Math.floor(Math.random()*1000000)),
-                borderColor: '#000',
-                backgroundColor: 'rgba(0,0,0,0.1)',
+                data: @json($chartData),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
                 fill: true,
                 tension: 0.4,
             }]

@@ -110,12 +110,18 @@
             <a href="{{ route('shop.show', $product) }}" class="product-card group cursor-pointer flex flex-col h-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg overflow-hidden">
                 <div class="product-image relative aspect-square md:aspect-[3/4] overflow-hidden bg-gray-50">
                     @if($product->gambar)
-                         <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama }}" class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105">
+                         <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama }}" class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 {{ $product->stok <= 0 ? 'opacity-60' : '' }}">
                     @else
                         <!-- Fallback Image -->
                         <img src="{{ asset('images/square.png') }}" class="w-full h-full object-cover object-center grayscale opacity-80 transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0">
                     @endif
                     
+                    @if($product->stok <= 0)
+                    <!-- Out of Stock Overlay -->
+                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <span class="bg-white text-black text-[10px] md:text-xs uppercase font-bold px-4 py-2 tracking-widest">Stok Habis</span>
+                    </div>
+                    @else
                     <form action="{{ route('cart.add') }}" method="POST" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] hidden md:block" onclick="event.stopPropagation();">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -125,6 +131,7 @@
                             Tambah ke Tas
                         </button>
                     </form>
+                    @endif
                 </div>
                 
                 <div class="flex flex-col flex-grow justify-between p-2 md:p-4">
@@ -137,8 +144,8 @@
                     <div class="font-bold text-[10px] md:text-sm">
                         @if($product->harga_coret && $product->harga_coret > $product->harga)
                         <div class="flex flex-col">
-                            <span class="text-[8px] md:text-xs text-gray-400 line-through">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</span>
-                            <span class="text-red-600">IDR {{ number_format($product->harga, 0, ',', '.') }}</span>
+                            <span class="text-[8px] md:text-xs text-gray-500" style="text-decoration: line-through; text-decoration-color: #ef4444; text-decoration-thickness: 2px;">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</span>
+                            <span class="text-red-600 font-bold">IDR {{ number_format($product->harga, 0, ',', '.') }}</span>
                         </div>
                         @else
                             IDR {{ number_format($product->harga, 0, ',', '.') }}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\PasswordChangeRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,7 +19,12 @@ class ProfileController extends Controller
             ->take(5)
             ->get();
 
-        return view('profile.index', compact('user', 'recentOrders'));
+        // Check if user has pending password change request
+        $pendingPasswordRequest = PasswordChangeRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        return view('profile.index', compact('user', 'recentOrders', 'pendingPasswordRequest'));
     }
 
     // Show order history
@@ -65,7 +71,7 @@ class ProfileController extends Controller
         return back()->with('success', 'Profile updated successfully');
     }
 
-    // Update password
+    // Request password change (requires admin verification)
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -76,13 +82,38 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Current password is incorrect']);
+            return back()->withErrors(['current_password' => 'Password saat ini salah']);
         }
 
-        $user->update([
-            'password' => Hash::make($request->password),
+        // Check if there's already a pending request
+        $existingRequest = PasswordChangeRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return back()->with('error', 'Anda sudah memiliki permintaan perubahan password yang menunggu verifikasi admin.');
+        }
+
+        // Create password change request
+        PasswordChangeRequest::create([
+            'user_id' => $user->id,
+            'new_password_hash' => Hash::make($request->password),
+            'status' => 'pending',
         ]);
 
-        return back()->with('success', 'Password updated successfully');
+        return back()->with('success', 'Permintaan perubahan password telah dikirim. Menunggu verifikasi admin.');
+    }
+
+    // Cancel pending password change request
+    public function cancelPasswordRequest()
+    {
+        $user = Auth::user();
+        
+        PasswordChangeRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->delete();
+
+        return back()->with('success', 'Permintaan perubahan password telah dibatalkan.');
     }
 }
+

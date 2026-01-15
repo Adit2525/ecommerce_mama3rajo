@@ -24,6 +24,11 @@ class CartController extends Controller
     {
         $product = Product::findOrFail($request->product_id);
         
+        // Check if product is in stock
+        if ($product->stok <= 0) {
+            return redirect()->back()->with('error', 'Stok tidak tersedia');
+        }
+        
         $cart = session()->get('cart', []);
         
         // Get color and size from request
@@ -35,6 +40,15 @@ class CartController extends Controller
         
         // Generate a unique ID for the item based on ID + Options (Color/Size)
         $cartKey = $product->id . '-' . strtolower(str_replace(' ', '-', $color)) . '-' . strtolower($size);
+
+        // Calculate total quantity in cart for this product
+        $existingQty = isset($cart[$cartKey]) ? $cart[$cartKey]['quantity'] : 0;
+        $totalQty = $existingQty + $quantity;
+        
+        // Check if requested quantity exceeds available stock
+        if ($totalQty > $product->stok) {
+            return redirect()->back()->with('error', 'Stok tidak tersedia');
+        }
 
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $quantity;

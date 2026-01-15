@@ -2,14 +2,15 @@
 
 @section('content')
 <!-- Hero Section -->
-<section class="relative h-[65vh] w-full overflow-hidden">
+<section class="relative h-[50vh] w-full overflow-hidden">
     <img src="{{ asset('images/hero.png') }}" alt="MAMA3RAJO New Collection" class="w-full h-full object-cover object-top">
     <div class="absolute inset-0 bg-black/20 flex flex-col justify-center items-center text-center text-white">
         <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 5rem; letter-spacing: 0.15em; margin-bottom: 1.5rem;" class="md:text-8xl uppercase">MAMA3RAJO</h1>
-        <p class="text-sm md:text-xl font-light tracking-wide max-w-3xl px-6 leading-relaxed">
+        <p class="text-sm md:text-xl font-light tracking-wide max-w-3xl leading-relaxed mb-24 inline-block bg-black/40 px-8 py-4 rounded backdrop-blur-sm shadow-lg">
             Hijab mengangkat kearifan lokal, dengan potensi wisata budaya Sumatera Barat
         </p>
-        <a href="{{ route('shop.index') }}" class="mt-10 inline-block bg-white text-black px-10 py-4 text-xs tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all duration-500">
+        <div class="w-24 h-px bg-white mx-auto mb-12"></div>
+        <a href="{{ route('shop.index') }}" class="mt-8 inline-block bg-white text-black px-10 py-4 text-xs tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all duration-500">
             Lihat Koleksi
         </a>
     </div>
@@ -44,7 +45,8 @@
 <section class="max-w-[2400px] mx-auto px-4 md:px-12 pb-16 md:pb-24 mb-8 md:mb-16">
     <div class="flex justify-between items-end mb-10">
         <div>
-            <h2 class="text-2xl font-serif mb-2">PRODUK TERBARU</h2>
+            <h2 class="text-2xl font-serif mb-2">BEST SELLER</h2>
+            <p class="text-xs text-gray-500 tracking-wide">Produk terlaris pilihan pelanggan</p>
         </div>
          <a href="{{ route('shop.index') }}" class="text-xs font-bold uppercase tracking-widest hover:underline underline-offset-4 decoration-1">Lihat Semua</a>
     </div>
@@ -54,13 +56,20 @@
         <a href="{{ route('shop.show', $product) }}" class="product-card group cursor-pointer bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg overflow-hidden flex flex-col h-full">
             <div class="product-image relative overflow-hidden aspect-square md:aspect-[3/4] bg-gray-50">
                 @if($product->gambar)
-                     <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama }}" class="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-500">
+                     <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama }}" class="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-500 {{ $product->stok <= 0 ? 'opacity-60' : '' }}">
                 @else
                     <img src="{{ asset('images/square.png') }}" class="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-500 grayscale group-hover:grayscale-0">
                 @endif
+                
+                @if($product->stok <= 0)
+                <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <span class="bg-white text-black text-[10px] md:text-xs uppercase font-bold px-4 py-2 tracking-widest">Stok Habis</span>
+                </div>
+                @else
                 <div class="absolute bottom-0 left-0 w-full bg-white/90 py-2 text-center transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     <span class="text-xs font-bold tracking-widest uppercase">Lihat Detail</span>
                 </div>
+                @endif
             </div>
             <div class="p-2 md:p-4 flex flex-col flex-grow">
                 <div class="mb-1 md:mb-2">
@@ -70,7 +79,7 @@
                 <div class="flex items-center justify-between mt-auto pt-1 md:pt-2 border-t border-gray-50">
                     @if($product->harga_coret > $product->harga)
                         <div class="flex flex-col">
-                           <span class="text-[8px] md:text-[10px] text-gray-400 line-through">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</span>
+                           <span class="text-[8px] md:text-[10px] text-gray-500" style="text-decoration: line-through; text-decoration-color: #ef4444; text-decoration-thickness: 2px;">IDR {{ number_format($product->harga_coret, 0, ',', '.') }}</span>
                             <span class="text-[10px] md:text-xs font-bold text-red-600">IDR {{ number_format($product->harga, 0, ',', '.') }}</span>
                         </div>
                     @else

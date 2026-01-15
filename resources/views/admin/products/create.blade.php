@@ -59,6 +59,19 @@
                     @error('stok')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
                 <div class="mb-3">
+                    <label for="ukuran" class="form-label">Ukuran</label>
+                    <select name="ukuran" id="ukuran" class="form-select @error('ukuran') is-invalid @enderror">
+                        <option value="">Pilih Ukuran</option>
+                        <option value="All Size" {{ old('ukuran') == 'All Size' ? 'selected' : '' }}>All Size</option>
+                        <option value="S" {{ old('ukuran') == 'S' ? 'selected' : '' }}>S</option>
+                        <option value="M" {{ old('ukuran') == 'M' ? 'selected' : '' }}>M</option>
+                        <option value="L" {{ old('ukuran') == 'L' ? 'selected' : '' }}>L</option>
+                        <option value="XL" {{ old('ukuran') == 'XL' ? 'selected' : '' }}>XL</option>
+                        <option value="XXL" {{ old('ukuran') == 'XXL' ? 'selected' : '' }}>XXL</option>
+                    </select>
+                    @error('ukuran')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+                <div class="mb-3">
                     <label for="kategori_id" class="form-label">Kategori *</label>
                     <select name="kategori_id" id="kategori_id" class="form-select @error('kategori_id') is-invalid @enderror" required>
                         <option value="">Pilih Kategori</option>

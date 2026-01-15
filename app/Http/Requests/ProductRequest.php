@@ -21,6 +21,7 @@ class ProductRequest extends FormRequest
             'harga' => 'required|numeric|min:0',
             'harga_coret' => 'nullable|numeric|min:0',
             'stok' => 'nullable|integer|min:0',
+            'ukuran' => 'nullable|string|max:50',
             'is_active' => 'boolean',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',

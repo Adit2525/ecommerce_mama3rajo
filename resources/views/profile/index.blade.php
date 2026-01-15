@@ -119,45 +119,80 @@
                 <div style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
                     <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
                         <h2 style="margin: 0; font-size: 18px; font-weight: 700;">Ubah Password</h2>
-                        <p style="margin: 4px 0 0 0; font-size: 14px; color: #6b7280;">Gunakan password yang kuat</p>
+                        <p style="margin: 4px 0 0 0; font-size: 14px; color: #6b7280;">Perubahan password memerlukan verifikasi admin</p>
                     </div>
                     <div style="padding: 24px;">
-                        <form action="{{ route('profile.password') }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                                <div>
-                                    <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Password Saat Ini</label>
-                                    <input type="password" name="current_password" 
-                                           style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box;">
-                                    @error('current_password')
-                                        <p style="color: #dc2626; font-size: 12px; margin: 4px 0 0 0;">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div>
-                                    <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Password Baru</label>
-                                    <input type="password" name="password" 
-                                           style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box;">
-                                    @error('password')
-                                        <p style="color: #dc2626; font-size: 12px; margin: 4px 0 0 0;">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div>
-                                    <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Konfirmasi Password</label>
-                                    <input type="password" name="password_confirmation" 
-                                           style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box;">
-                                </div>
+                        @if(session('error'))
+                            <div style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">
+                                {{ session('error') }}
                             </div>
+                        @endif
 
-                            <div style="margin-top: 24px;">
-                                <button type="submit" style="background: #f3f4f6; color: #374151; padding: 12px 24px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; font-size: 14px;">
-                                    Ubah Password
-                                </button>
+                        @if(isset($pendingPasswordRequest) && $pendingPasswordRequest)
+                            <!-- Pending Request Notice -->
+                            <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <svg style="width: 20px; height: 20px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <p style="margin: 0; font-weight: 600; color: #92400e;">Menunggu Verifikasi Admin</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #a16207;">
+                                            Permintaan diajukan pada {{ $pendingPasswordRequest->created_at->format('d M Y, H:i') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <form action="{{ route('profile.cancel-password-request') }}" method="POST" style="margin-top: 12px;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" style="background: #dc2626; color: white; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer;">
+                                        Batalkan Permintaan
+                                    </button>
+                                </form>
                             </div>
-                        </form>
+                        @else
+                            <form action="{{ route('profile.password') }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                    <div>
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Password Saat Ini</label>
+                                        <input type="password" name="current_password" 
+                                               style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box;">
+                                        @error('current_password')
+                                            <p style="color: #dc2626; font-size: 12px; margin: 4px 0 0 0;">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Password Baru</label>
+                                        <input type="password" name="password" 
+                                               style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box;">
+                                        @error('password')
+                                            <p style="color: #dc2626; font-size: 12px; margin: 4px 0 0 0;">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Konfirmasi Password</label>
+                                        <input type="password" name="password_confirmation" 
+                                               style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 16px; font-size: 14px; box-sizing: border-box;">
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 24px;">
+                                    <button type="submit" style="background: #f3f4f6; color: #374151; padding: 12px 24px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; font-size: 14px;">
+                                        Ajukan Perubahan Password
+                                    </button>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #6b7280;">
+                                        * Perubahan password akan diverifikasi oleh admin terlebih dahulu
+                                    </p>
+                                </div>
+                            </form>
+                        @endif
                     </div>
                 </div>
 

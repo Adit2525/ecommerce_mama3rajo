@@ -9,10 +9,37 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::latest()->paginate(20);
-        return view('admin.products.index', compact('products'));
+        $query = Product::with('category');
+
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by category
+        if ($request->filled('kategori')) {
+            $query->where('kategori_id', $request->kategori);
+        }
+
+        // Filter by size
+        if ($request->filled('ukuran')) {
+            $query->where('ukuran', $request->ukuran);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'aktif');
+        }
+
+        $products = $query->latest()->paginate(20);
+        $categories = \App\Models\Category::where('is_active', true)->get();
+        
+        // Get distinct sizes from products
+        $sizes = Product::whereNotNull('ukuran')->distinct()->pluck('ukuran');
+
+        return view('admin.products.index', compact('products', 'categories', 'sizes'));
     }
 
     public function create()

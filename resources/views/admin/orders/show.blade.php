@@ -3,8 +3,9 @@
 @section('title','Detail Pesanan')
 
 @section('content')
-<div class="mb-4">
+<div class="mb-4 d-flex justify-content-between">
     <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary btn-sm">&larr; Kembali</a>
+    <a href="{{ route('admin.orders.invoice', $order->id) }}" target="_blank" class="btn btn-primary btn-sm"><i class="bi bi-printer"></i> Lihat Invoice</a>
 </div>
 
 <div class="row">

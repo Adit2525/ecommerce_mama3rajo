@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\ShippingRate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -26,7 +28,10 @@ class CheckoutController extends Controller
             $total += $item['price'] * $item['quantity'];
         }
 
-        return view('shop.checkout', compact('cart', 'total'));
+        // Get active shipping rates
+        $shippingRates = ShippingRate::where('is_active', true)->get();
+
+        return view('shop.checkout', compact('cart', 'total', 'shippingRates'));
     }
 
     // Process checkout
@@ -38,6 +43,7 @@ class CheckoutController extends Controller
             'alamat' => 'required|string',
             'kota' => 'required|string|max:100',
             'kode_pos' => 'required|string|max:10',
+            'shipping_rate_id' => 'required|exists:shipping_rates,id',
             'catatan' => 'nullable|string|max:500',
         ]);
 
@@ -47,9 +53,25 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty');
         }
 
-        $total = 0;
+        $subtotal = 0;
         foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
+            $subtotal += $item['price'] * $item['quantity'];
+        }
+
+        // Get shipping rate
+        $shippingRate = ShippingRate::findOrFail($request->shipping_rate_id);
+        $ongkir = $shippingRate->price;
+        $total = $subtotal + $ongkir;
+
+        // Validate stock first
+        foreach ($cart as $id => $item) {
+            $product = Product::find($item['product_id']);
+            if (!$product) {
+                return redirect()->route('cart.index')->with('error', 'Produk tidak ditemukan.');
+            }
+            if ($product->stok < $item['quantity']) {
+                return redirect()->route('cart.index')->with('error', 'Stok untuk ' . $product->nama . ' tidak mencukupi. Sisa stok: ' . $product->stok);
+            }
         }
 
         // Generate order code
@@ -65,13 +87,16 @@ class CheckoutController extends Controller
             'kota' => $request->kota,
             'kode_pos' => $request->kode_pos,
             'total_harga' => $total,
-            'ongkir' => 0,
+            'ongkir' => $ongkir,
+            'ekspedisi' => $shippingRate->courier_name,
             'status' => 'pending',
             'status_pembayaran' => 'belum_bayar',
         ]);
 
-        // Create order items using existing column names
+        // Create order items using existing column names and decrement stock
         foreach ($cart as $item) {
+            $product = Product::find($item['product_id']);
+            
             OrderItem::create([
                 'pesanan_id' => $order->id,
                 'produk_id' => $item['product_id'],
@@ -79,6 +104,11 @@ class CheckoutController extends Controller
                 'harga_satuan' => $item['price'],
                 'subtotal' => $item['price'] * $item['quantity'],
             ]);
+
+            // Decrement stock
+            if ($product) {
+                $product->decrement('stok', $item['quantity']);
+            }
         }
 
         // Clear cart

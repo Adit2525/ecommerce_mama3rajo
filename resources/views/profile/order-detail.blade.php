@@ -12,20 +12,25 @@
             <h1 style="font-size: 28px; font-family: 'Playfair Display', serif; margin: 0;">
                 Order #{{ $order->kode_pesanan ?? str_pad($order->id, 6, '0', STR_PAD_LEFT) }}
             </h1>
-            @php
-                $statusColors = [
-                    'pending' => ['bg' => '#fef3c7', 'text' => '#d97706'],
-                    'menunggu_verifikasi' => ['bg' => '#dbeafe', 'text' => '#2563eb'],
-                    'diproses' => ['bg' => '#e0e7ff', 'text' => '#4f46e5'],
-                    'dikirim' => ['bg' => '#ede9fe', 'text' => '#7c3aed'],
-                    'selesai' => ['bg' => '#d1fae5', 'text' => '#059669'],
-                    'dibatalkan' => ['bg' => '#fee2e2', 'text' => '#dc2626'],
-                ];
-                $colors = $statusColors[$order->status] ?? ['bg' => '#f3f4f6', 'text' => '#6b7280'];
-            @endphp
-            <span style="background: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
-                {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-            </span>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                @php
+                    $statusColors = [
+                        'pending' => ['bg' => '#fef3c7', 'text' => '#d97706'],
+                        'menunggu_verifikasi' => ['bg' => '#dbeafe', 'text' => '#2563eb'],
+                        'diproses' => ['bg' => '#e0e7ff', 'text' => '#4f46e5'],
+                        'dikirim' => ['bg' => '#ede9fe', 'text' => '#7c3aed'],
+                        'selesai' => ['bg' => '#d1fae5', 'text' => '#059669'],
+                        'dibatalkan' => ['bg' => '#fee2e2', 'text' => '#dc2626'],
+                    ];
+                    $colors = $statusColors[$order->status] ?? ['bg' => '#f3f4f6', 'text' => '#6b7280'];
+                @endphp
+                <span style="background: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
+                    {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                </span>
+                <a href="{{ route('invoice.show', $order) }}" target="_blank" style="background: #111; color: white; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none;">
+                    📄 Lihat Invoice
+                </a>
+            </div>
         </div>
     </div>
 
@@ -36,17 +41,7 @@
             <p style="font-weight: 500; margin: 0;">{{ $order->created_at->format('d M Y, H:i') }}</p>
 
             <h3 style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin: 16px 0 8px 0;">Metode Pengiriman</h3>
-            <p style="font-weight: 500; margin: 0;">
-                @if($order->ekspedisi == 'toko')
-                    Ekspedisi Toko
-                @elseif($order->ekspedisi == 'regular')
-                    Regular (JNE/J&T/SiCepat)
-                @elseif($order->ekspedisi == 'lainnya')
-                    Lainnya / Other
-                @else
-                    {{ ucfirst($order->ekspedisi ?? '-') }}
-                @endif
-            </p>
+            <p style="font-weight: 500; margin: 0;">{{ $order->ekspedisi ?? 'Belum dipilih' }}</p>
         </div>
         <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
             <h3 style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin: 0 0 8px 0;">Alamat Pengiriman</h3>
@@ -125,17 +120,24 @@
     </div>
 
     <!-- Order Summary -->
+    @php
+        $subtotal = $order->total_harga - ($order->ongkir ?? 0);
+    @endphp
     <div style="background: #f9fafb; padding: 24px; border-radius: 8px; margin-bottom: 24px;">
         <h2 style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">Ringkasan Pesanan</h2>
         
         <div style="margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
                 <span style="color: #6b7280;">Subtotal ({{ $order->items->sum('jumlah') }} item)</span>
-                <span>IDR {{ number_format($order->total_harga, 0, ',', '.') }}</span>
+                <span>IDR {{ number_format($subtotal, 0, ',', '.') }}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 14px;">
                 <span style="color: #6b7280;">Ongkos Kirim</span>
-                <span style="color: #059669;">Gratis</span>
+                @if($order->ongkir > 0)
+                    <span>IDR {{ number_format($order->ongkir, 0, ',', '.') }}</span>
+                @else
+                    <span style="color: #059669;">Gratis</span>
+                @endif
             </div>
         </div>
 
@@ -154,6 +156,9 @@
 
     <!-- Actions -->
     <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="{{ route('invoice.show', $order) }}" target="_blank" style="flex: 1; text-align: center; background: #374151; color: white; padding: 16px; text-decoration: none; font-weight: 600; font-size: 14px; border-radius: 8px;">
+            📄 Lihat Invoice
+        </a>
         <a href="{{ route('shop.index') }}" style="flex: 1; text-align: center; background: black; color: white; padding: 16px; text-decoration: none; font-weight: 600; font-size: 14px; border-radius: 8px;">
             Lanjut Belanja
         </a>
